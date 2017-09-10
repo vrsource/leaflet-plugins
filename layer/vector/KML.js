@@ -329,9 +329,7 @@ L.Util.extend(L.KML, {
 		}
 
 		if (name) {
-			layer.on('add', function(e) {
-				layer.bindPopup('<h2>' + name + '</h2>' + descr);
-			});
+			layer.bindPopup('<h2>' + name + '</h2>' + descr);
 		}
 
 		return layer;
