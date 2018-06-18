@@ -1,4 +1,21 @@
-L.KML = L.FeatureGroup.extend({
+// See: https://github.com/Leaflet/Leaflet/blob/master/PLUGIN-GUIDE.md#module-loaders
+(function (factory, window) {
+   // define an AMD module that relies on 'leaflet'
+   if (typeof define === 'function' && define.amd) {
+      define(['leaflet'], factory);
+
+      // define a Common JS module that relies on 'leaflet'
+   } else if (typeof exports === 'object') {
+      module.exports = factory(require('leaflet'));
+   }
+
+   // attach your plugin to the global 'L' variable
+   if (typeof window !== 'undefined' && window.L) {
+      window.L.KML = factory(L);
+   }
+})(function (L) {
+
+var KML = L.FeatureGroup.extend({
 	options: {
 		async: true
 	},
@@ -58,7 +75,7 @@ L.KML = L.FeatureGroup.extend({
          this.fire("load-error");
          return;
       }
-		var layers = L.KML.parseKML(xml, url);
+		var layers = KML.parseKML(xml, url);
       if (!layers || !layers.length) {
          this.fire("load-error");
          return;
@@ -69,14 +86,14 @@ L.KML = L.FeatureGroup.extend({
 			});
 			this.addLayer(layers[i]);
 		}
-		this.latLngs = L.KML.getLatLngs(xml);
+		this.latLngs = KML.getLatLngs(xml);
 		this.fire('loaded');
 	},
 
 	latLngs: []
 });
 
-L.Util.extend(L.KML, {
+L.Util.extend(KML, {
 
 	parseKML: function (xml, url) {
 		var style = this.parseStyles(xml, url);
@@ -529,3 +546,7 @@ L.RotatedImageOverlay = L.ImageOverlay.extend({
 		return this._bounds;
 	}
 });
+
+return KML;
+
+}, window);
