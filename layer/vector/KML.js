@@ -309,32 +309,10 @@ L.Util.extend(KML, {
 			}
 		}
 
-		var multi = ['MultiGeometry', 'MultiTrack', 'gx:MultiTrack'];
-		for (h in multi) {
-		  el = place.getElementsByTagName(multi[h]);
-		  for (i = 0; i < el.length; i++) {
-		    return this.parsePlacemark(el[i], xml, style, options);
-		  }
-		}
-		
-		var layers = [];
-
-		var parse = ['LineString', 'Polygon', 'Point', 'Track', 'gx:Track'];
-		for (j in parse) {
-			var tag = parse[j];
-			el = place.getElementsByTagName(tag);
-			for (i = 0; i < el.length; i++) {
-				var l = this['parse' + tag.replace(/gx:/, '')](el[i], xml, options);
-				if (l) { layers.push(l); }
-			}
-		}
+		var layers = this.buildLayers(place, xml, style, options);
 
 		if (!layers.length) {
 			return;
-		}
-		var layer = layers[0];
-		if (layers.length > 1) {
-			layer = new L.FeatureGroup(layers);
 		}
 
 		var name, descr = '';
@@ -349,14 +327,53 @@ L.Util.extend(KML, {
 			}
 		}
 
-		if (name) {
-			layer.on('add', function(e) {
+		// NOTE: In newer versions of Leaflet we can listen to the add event for the
+		//       FeatureGroup also.
+		var layer = layers[0];
+		if (layers.length > 1) {
+			layer = new L.FeatureGroup(layers);
+			if (name) {
 				layer.bindPopup('<h2>' + name + '</h2>' + descr);
-			});
+			}
+		} else {
+			if (name) {
+				layer.on('add', function(e) {
+					layer.bindPopup('<h2>' + name + '</h2>' + descr);
+				});
+			}
 		}
 
 		return layer;
 	},
+
+	buildLayers: function (geomParent, xml, style, options) {
+		var layers = [];
+
+		// If we have any of the following return the layers for the contained geometry.
+		var multi = ['MultiGeometry', 'MultiTrack', 'gx:MultiTrack'];
+		for (h in multi) {
+		  el = geomParent.getElementsByTagName(multi[h]);
+		  for (i = 0; i < el.length; i++) {
+		    if (el[i].parentNode === geomParent) {
+                       // Return geometry for first MultiGeometry that is found.
+                       layers = layers.concat(this.buildLayers(el[i], xml, style, options));
+                    }
+		  }
+		}
+
+		var parse = ['LineString', 'Polygon', 'Point', 'Track', 'gx:Track'];
+		for (j in parse) {
+			var tag = parse[j];
+			el = geomParent.getElementsByTagName(tag);
+			for (i = 0; i < el.length; i++) {
+				if (el[i].parentNode === geomParent) {
+					var l = this['parse' + tag.replace(/gx:/, '')](el[i], xml, options);
+					if (l) { layers.push(l); }
+				}
+			}
+		}
+		return layers;
+        },
 
 	parseCoords: function (xml) {
 		var el = xml.getElementsByTagName('coordinates');
