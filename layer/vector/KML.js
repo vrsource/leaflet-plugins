@@ -351,9 +351,9 @@ L.Util.extend(KML, {
 
 		// If we have any of the following return the layers for the contained geometry.
 		var multi = ['MultiGeometry', 'MultiTrack', 'gx:MultiTrack'];
-		for (h in multi) {
-		  el = geomParent.getElementsByTagName(multi[h]);
-		  for (i = 0; i < el.length; i++) {
+		for (var h in multi) {
+		  var el = geomParent.getElementsByTagName(multi[h]);
+		  for (var i = 0; i < el.length; i++) {
 		    if (el[i].parentNode === geomParent) {
                        // Return geometry for first MultiGeometry that is found.
                        layers = layers.concat(this.buildLayers(el[i], xml, style, options));
@@ -362,7 +362,7 @@ L.Util.extend(KML, {
 		}
 
 		var parse = ['LineString', 'Polygon', 'Point', 'Track', 'gx:Track'];
-		for (j in parse) {
+		for (var j in parse) {
 			var tag = parse[j];
 			el = geomParent.getElementsByTagName(tag);
 			for (i = 0; i < el.length; i++) {
