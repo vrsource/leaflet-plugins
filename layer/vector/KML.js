@@ -511,18 +511,33 @@ L.Util.extend(KML, {
 });
 
 L.KMLIcon = L.Icon.extend({
-	_setIconStyles: function (img, name) {
+   options: {
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+   },
+   _setIconStyles: function (img, name) {
 		L.Icon.prototype._setIconStyles.apply(this, [img, name]);
+	},
+	_createImg: function (src, el) {
+		el = el || document.createElement('img');
+		el.onload = this.applyCustomStyles.bind(this,el)
+		el.src = src;
+		return el;
+	},
+	applyCustomStyles: function(img) {
 		var options = this.options;
-		this.options.popupAnchor = [0,(-0.83*img.height)];
+		var width = options.iconSize[0];
+		var height = options.iconSize[1];
+
+		this.options.popupAnchor = [0,(-0.83*height)];
 		if (options.anchorType.x === 'fraction')
-			img.style.marginLeft = (-options.anchorRef.x * img.width) + 'px';
+			img.style.marginLeft = (-options.anchorRef.x * width) + 'px';
 		if (options.anchorType.y === 'fraction')
-			img.style.marginTop  = ((-(1 - options.anchorRef.y) * img.height) + 1) + 'px';
+			img.style.marginTop  = ((-(1 - options.anchorRef.y) * height) + 1) + 'px';
 		if (options.anchorType.x === 'pixels')
 			img.style.marginLeft = (-options.anchorRef.x) + 'px';
 		if (options.anchorType.y === 'pixels')
-			img.style.marginTop  = (options.anchorRef.y - img.height + 1) + 'px';
+			img.style.marginTop  = (options.anchorRef.y - height + 1) + 'px';
 	}
 });
 
