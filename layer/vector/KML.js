@@ -327,18 +327,27 @@ L.Util.extend(KML, {
 			}
 		}
 
+      var popup = '';
+      if (name) {
+         popup += '<h2>' + name + '</h2>';
+      }
+      if (descr) {
+         popup += descr;
+      }
+
 		// NOTE: In newer versions of Leaflet we can listen to the add event for the
 		//       FeatureGroup also.
-		var layer = layers[0];
+      var layer = layers[0];
+
 		if (layers.length > 1) {
 			layer = new L.FeatureGroup(layers);
-			if (name) {
-				layer.bindPopup('<h2>' + name + '</h2>' + descr);
+			if (popup) {
+				layer.bindPopup(popup);
 			}
 		} else {
-			if (name) {
+			if (popup) {
 				layer.on('add', function(e) {
-					layer.bindPopup('<h2>' + name + '</h2>' + descr);
+					layer.bindPopup(popup);
 				});
 			}
 		}
